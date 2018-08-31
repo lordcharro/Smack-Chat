@@ -18,11 +18,15 @@ import com.charroapps.smackchat.R
 import com.charroapps.smackchat.Services.AuthService
 import com.charroapps.smackchat.Utilities.BROADCAST_USER_DATA_CHANGE
 import com.charroapps.smackchat.Services.UserDataService
+import com.charroapps.smackchat.Utilities.SOCKET_URL
+import io.socket.client.IO
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.nav_header_main.*
 
 class MainActivity : AppCompatActivity() {
+
+    val socket = IO.socket(SOCKET_URL)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,9 +40,25 @@ class MainActivity : AppCompatActivity() {
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
 
+
+    }
+
+    override fun onResume() {
         LocalBroadcastManager.getInstance(this).registerReceiver(userDataChangeReceiver,
                 IntentFilter(BROADCAST_USER_DATA_CHANGE))
+        socket.connect()
+        super.onResume()
+    }
 
+
+    override fun onPause() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(userDataChangeReceiver)
+        super.onPause()
+    }
+
+    override fun onDestroy() {
+        socket.disconnect()
+        super.onDestroy()
     }
 
     private val userDataChangeReceiver = object: BroadcastReceiver(){
@@ -80,11 +100,10 @@ class MainActivity : AppCompatActivity() {
                         val channelDesc = descTextField.text.toString()
 
                         //Create channel with the channel name and description
-                        hideKeyboard()
+                        socket.emit("newChannel", channelName, channelDesc)
                     }
                     .setNegativeButton("Cancel"){ dialogInterface, i ->
                         //Cancel and close the dialog
-                        hideKeyboard()
 
                     }
                     .show()
@@ -109,7 +128,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun sendMessageBtnClicked(view: View){
-
+        hideKeyboard()
     }
 
     fun hideKeyboard(){
