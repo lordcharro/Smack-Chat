@@ -1,7 +1,6 @@
-package com.charroapps.smackchat.Utilities
+package com.charroapps.smackchat.Services
 
 import android.graphics.Color
-import com.charroapps.smackchat.Services.AuthService
 import java.util.*
 
 object UserDataService {
