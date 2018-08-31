@@ -14,7 +14,7 @@ import android.view.View
 import com.charroapps.smackchat.R
 import com.charroapps.smackchat.Services.AuthService
 import com.charroapps.smackchat.Utilities.BROADCAST_USER_DATA_CHANGE
-import com.charroapps.smackchat.Utilities.UserDataService
+import com.charroapps.smackchat.Services.UserDataService
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.nav_header_main.*
