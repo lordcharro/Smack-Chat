@@ -14,7 +14,7 @@ import org.json.JSONObject
 
 object AuthService {
 
-    var isLoggenIn = false
+    var isLoggedIn = false
     var userEmail = ""
     var authToken = ""
 
@@ -55,7 +55,7 @@ object AuthService {
             try{
                 userEmail = response.getString("user")
                 authToken = response.getString("token")
-                isLoggenIn = true
+                isLoggedIn = true
                 complete(true)
             }catch (e: JSONException){
                 Log.d("JSON", "EXC:" + e.localizedMessage)
@@ -130,7 +130,7 @@ object AuthService {
 
     fun findUserbyEmail(context: Context, complete: (Boolean) -> Unit){
 
-        val findUserRequest = object : JsonObjectRequest(Method.GET, "$URL_GET_USER", null, Response.Listener { response ->
+        val findUserRequest = object : JsonObjectRequest(Method.GET, "$URL_GET_USER$userEmail", null, Response.Listener { response ->
             try {
                 UserDataService.name = response.getString("name")
                 UserDataService.email = response.getString("email")

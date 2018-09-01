@@ -11,6 +11,7 @@ import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
@@ -52,11 +53,11 @@ class MainActivity : AppCompatActivity() {
 
 
     override fun onPause() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(userDataChangeReceiver)
         super.onPause()
     }
 
     override fun onDestroy() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(userDataChangeReceiver)
         socket.disconnect()
         super.onDestroy()
     }
@@ -64,7 +65,7 @@ class MainActivity : AppCompatActivity() {
     private val userDataChangeReceiver = object: BroadcastReceiver(){
         override fun onReceive(context: Context?, intent: Intent?) {
             //When Broadcast is send out
-            if(AuthService.isLoggenIn){
+            if(AuthService.isLoggedIn){
                 //The user is logged in
                 userNameNavHeader.text = UserDataService.name
                 userEmailNavHeader.text = UserDataService.email
@@ -87,7 +88,7 @@ class MainActivity : AppCompatActivity() {
 
     fun addChannelClicked(view: View){
 
-        if(AuthService.isLoggenIn){
+        if(AuthService.isLoggedIn){
             val builder = AlertDialog.Builder(this)
             val dialogView = layoutInflater.inflate(R.layout.add_channel_dialog, null)
 
@@ -113,7 +114,7 @@ class MainActivity : AppCompatActivity() {
 
     fun loginBtnNavClicked(view: View){
 
-        if(AuthService.isLoggenIn){
+        if(AuthService.isLoggedIn){
             //logout
             UserDataService.logout()
             userNameNavHeader.text = ""

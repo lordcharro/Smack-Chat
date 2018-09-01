@@ -25,7 +25,7 @@
         android:layout_marginLeft="18dp"
         android:layout_marginRight="18dp"
         android:ems="10"
-        android:hint="channel description"
+        android:hint="channel name"
         android:inputType="textPersonName"
         tools:layout_editor_absoluteX="0dp"
         tools:layout_editor_absoluteY="90dp" />
@@ -38,7 +38,7 @@
         android:layout_marginLeft="18dp"
         android:layout_marginRight="18dp"
         android:ems="10"
-        android:hint="channel name"
+        android:hint="channel description"
         android:inputType="textPersonName"
         android:textColor="@android:color/darker_gray"
         tools:layout_editor_absoluteX="0dp"

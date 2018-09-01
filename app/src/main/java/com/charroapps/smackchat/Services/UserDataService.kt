@@ -18,7 +18,7 @@ object UserDataService {
         name = ""
         AuthService.authToken = ""
         AuthService.userEmail = ""
-        AuthService.isLoggenIn = false
+        AuthService.isLoggedIn = false
     }
 
     fun returnAvatarColor(components: String): Int{
