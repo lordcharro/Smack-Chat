@@ -11,16 +11,18 @@ import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import com.charroapps.smackchat.Model.Channel
 import com.charroapps.smackchat.R
 import com.charroapps.smackchat.Services.AuthService
+import com.charroapps.smackchat.Services.MessageService
 import com.charroapps.smackchat.Utilities.BROADCAST_USER_DATA_CHANGE
 import com.charroapps.smackchat.Services.UserDataService
 import com.charroapps.smackchat.Utilities.SOCKET_URL
 import io.socket.client.IO
+import io.socket.emitter.Emitter
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.nav_header_main.*
@@ -33,6 +35,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
+
+        socket.connect()
+        socket.on("channelCreated", onNewChannel)
 
         hideKeyboard()
 
@@ -47,7 +52,6 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         LocalBroadcastManager.getInstance(this).registerReceiver(userDataChangeReceiver,
                 IntentFilter(BROADCAST_USER_DATA_CHANGE))
-        socket.connect()
         super.onResume()
     }
 
@@ -110,6 +114,17 @@ class MainActivity : AppCompatActivity() {
                     .show()
         }
 
+    }
+
+    private val onNewChannel = Emitter.Listener { args ->
+        runOnUiThread {
+            val channelName = args[0] as String
+            val channelDesc = args[1] as String
+            val channelID = args[2] as String
+
+            val newChannel = Channel(channelName,channelDesc,channelID)
+            MessageService.channels.add(newChannel)
+        }
     }
 
     fun loginBtnNavClicked(view: View){
