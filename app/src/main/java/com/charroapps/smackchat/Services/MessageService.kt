@@ -20,7 +20,7 @@ object MessageService {
     fun getChannels(complete: (Boolean) -> Unit){
 
         val channelsRequest = object : JsonArrayRequest(Method.GET, URL_GET_CHANNELS, null, Response.Listener { response ->
-
+            clearChannels()
             try {
 
                 for(x in 0 until response.length()){

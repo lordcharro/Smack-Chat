@@ -13,6 +13,7 @@ object UserDataService {
     var name = ""
 
     fun logout(){
+        id = ""
         avatarColor = ""
         avatarName = ""
         email = ""
