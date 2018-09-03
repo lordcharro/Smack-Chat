@@ -11,28 +11,42 @@ import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.ArrayAdapter
 import android.widget.EditText
+import com.charroapps.smackchat.Model.Channel
 import com.charroapps.smackchat.R
 import com.charroapps.smackchat.Services.AuthService
+import com.charroapps.smackchat.Services.MessageService
 import com.charroapps.smackchat.Utilities.BROADCAST_USER_DATA_CHANGE
 import com.charroapps.smackchat.Services.UserDataService
 import com.charroapps.smackchat.Utilities.SOCKET_URL
 import io.socket.client.IO
+import io.socket.emitter.Emitter
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
+import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.nav_header_main.*
 
 class MainActivity : AppCompatActivity() {
 
     val socket = IO.socket(SOCKET_URL)
+    lateinit var channelAdapter: ArrayAdapter<Channel>
+    var selectedChannel: Channel? = null
+
+    private fun setupAdapters(){
+        channelAdapter = ArrayAdapter(this,android.R.layout.simple_list_item_1, MessageService.channels)
+        channel_list.adapter = channelAdapter
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
+
+        socket.connect()
+        socket.on("channelCreated", onNewChannel)
 
         hideKeyboard()
 
@@ -41,19 +55,24 @@ class MainActivity : AppCompatActivity() {
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
 
+        setupAdapters()
+
+        channel_list.setOnItemClickListener { _, _, i, l ->
+            selectedChannel = MessageService.channels[i]
+            drawer_layout.closeDrawer(GravityCompat.START)
+            updatewithChannel()
+        }
+
+        if(App.prefs.isLoggedIn){
+            AuthService.findUserbyEmail(this){}
+        }
 
     }
 
     override fun onResume() {
         LocalBroadcastManager.getInstance(this).registerReceiver(userDataChangeReceiver,
                 IntentFilter(BROADCAST_USER_DATA_CHANGE))
-        socket.connect()
         super.onResume()
-    }
-
-
-    override fun onPause() {
-        super.onPause()
     }
 
     override fun onDestroy() {
@@ -63,9 +82,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val userDataChangeReceiver = object: BroadcastReceiver(){
-        override fun onReceive(context: Context?, intent: Intent?) {
+        override fun onReceive(context: Context, intent: Intent?) {
             //When Broadcast is send out
-            if(AuthService.isLoggedIn){
+            if( App.prefs.isLoggedIn){
                 //The user is logged in
                 userNameNavHeader.text = UserDataService.name
                 userEmailNavHeader.text = UserDataService.email
@@ -73,9 +92,25 @@ class MainActivity : AppCompatActivity() {
                 userImageNavHeader.setImageResource(resourceId)
                 userImageNavHeader.setBackgroundColor(UserDataService.returnAvatarColor(UserDataService.avatarColor))
                 loginBtnNavHeader.text = "Logout"
+
+                MessageService.getChannels{complete ->
+                    if(complete){
+                        //Verify if there are channels and present the first one
+                        if(MessageService.channels.count()>0){
+                            selectedChannel = MessageService.channels[0]
+                            channelAdapter.notifyDataSetChanged()
+                            updatewithChannel()
+                        }
+
+                    }
+                }
             }
         }
+    }
 
+    fun updatewithChannel(){
+        mainChannelName.text = "#${selectedChannel?.name}"
+        //download messages for channel
     }
 
     override fun onBackPressed() {
@@ -88,12 +123,12 @@ class MainActivity : AppCompatActivity() {
 
     fun addChannelClicked(view: View){
 
-        if(AuthService.isLoggedIn){
+        if(App.prefs.isLoggedIn){
             val builder = AlertDialog.Builder(this)
             val dialogView = layoutInflater.inflate(R.layout.add_channel_dialog, null)
 
             builder.setView(dialogView)
-                    .setPositiveButton("Add"){ dialogInterface, i ->
+                    .setPositiveButton("Add"){ _, _ ->
 
                         val nameTextField = dialogView.findViewById<EditText>(R.id.addChannelNameTxt)
                         val descTextField = dialogView.findViewById<EditText>(R.id.addChannelDescTxt)
@@ -103,7 +138,7 @@ class MainActivity : AppCompatActivity() {
                         //Create channel with the channel name and description
                         socket.emit("newChannel", channelName, channelDesc)
                     }
-                    .setNegativeButton("Cancel"){ dialogInterface, i ->
+                    .setNegativeButton("Cancel"){ _, _ ->
                         //Cancel and close the dialog
 
                     }
@@ -112,9 +147,22 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    //Get the new channel created
+    private val onNewChannel = Emitter.Listener { args ->
+        runOnUiThread {
+            val channelName = args[0] as String
+            val channelDesc = args[1] as String
+            val channelID = args[2] as String
+
+            val newChannel = Channel(channelName,channelDesc,channelID)
+            MessageService.channels.add(newChannel)
+            channelAdapter.notifyDataSetChanged()
+        }
+    }
+
     fun loginBtnNavClicked(view: View){
 
-        if(AuthService.isLoggedIn){
+        if(App.prefs.isLoggedIn){
             //logout
             UserDataService.logout()
             userNameNavHeader.text = ""
