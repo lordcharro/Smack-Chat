@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.Log
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonArrayRequest
-import com.android.volley.toolbox.Volley
 import com.charroapps.smackchat.Controller.App
 import com.charroapps.smackchat.Model.Channel
 import com.charroapps.smackchat.Utilities.URL_GET_CHANNELS
@@ -16,7 +15,7 @@ object MessageService {
     //channel array
     val channels = ArrayList<Channel>()
 
-    fun getChannels(context: Context, complete: (Boolean) -> Unit){
+    fun getChannels(complete: (Boolean) -> Unit){
 
         val channelsRequest = object : JsonArrayRequest(Method.GET, URL_GET_CHANNELS, null, Response.Listener { response ->
 
@@ -53,6 +52,6 @@ object MessageService {
                 return headers
             }
         }
-        Volley.newRequestQueue(context).add(channelsRequest)
+        App.prefs.requestQueue.add(channelsRequest)
     }
 }
