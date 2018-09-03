@@ -6,6 +6,7 @@ import com.android.volley.Response
 import com.android.volley.toolbox.JsonArrayRequest
 import com.charroapps.smackchat.Controller.App
 import com.charroapps.smackchat.Model.Channel
+import com.charroapps.smackchat.Model.Message
 import com.charroapps.smackchat.Utilities.URL_GET_CHANNELS
 import org.json.JSONException
 
@@ -14,6 +15,7 @@ object MessageService {
 
     //channel array
     val channels = ArrayList<Channel>()
+    val messages = ArrayList<Message>()
 
     fun getChannels(complete: (Boolean) -> Unit){
 
