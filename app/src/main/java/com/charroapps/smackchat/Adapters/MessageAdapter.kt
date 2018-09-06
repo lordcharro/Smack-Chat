@@ -15,6 +15,7 @@ import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
 
+// Custom adapter for the messages
 class MessageAdapter(val context: Context, val messages: ArrayList<Message>): RecyclerView.Adapter<MessageAdapter.ViewHolder>() {
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -45,6 +46,7 @@ class MessageAdapter(val context: Context, val messages: ArrayList<Message>): Re
             messageBody?.text = message.message
         }
 
+        // Parse the date to a better format
         fun returnDateString(isoString: String): String{
 
             val isoFormatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())

@@ -39,6 +39,9 @@ class MainActivity : AppCompatActivity() {
     lateinit var messageAdapter: MessageAdapter
     var selectedChannel: Channel? = null
 
+    // Simple function to start the list adapters
+    // channelAdapter is a simple list using an ArrayAdapter
+    // messageAdapter has customs items, so it needs to have a diferent adapter, the MessageAdapter
     private fun setupAdapters(){
         channelAdapter = ArrayAdapter(this,android.R.layout.simple_list_item_1, MessageService.channels)
         channel_list.adapter = channelAdapter
@@ -54,6 +57,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
+        // Start the socket.IO sockets for the continuously communication
+        // between the API and the Application in the messages and channel list
         socket.connect()
         socket.on("channelCreated", onNewChannel)
         socket.on("messageCreated", onNewMessage)
@@ -64,10 +69,14 @@ class MainActivity : AppCompatActivity() {
         toggle.syncState()
 
         setupAdapters()
+
+        // Register a receiver for the broadcast, if there is some modifications in the login,
+        // this receiver will receive the the data
         LocalBroadcastManager.getInstance(this).registerReceiver(userDataChangeReceiver,
                 IntentFilter(BROADCAST_USER_DATA_CHANGE))
 
-
+        // If one item of the channel list is clicked,
+        // the recyclerView for the messages will have the messages of this channel
         channel_list.setOnItemClickListener { _, _, i, l ->
             selectedChannel = MessageService.channels[i]
             drawer_layout.closeDrawer(GravityCompat.START)
@@ -80,17 +89,21 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    // Unregister the broadcast and disconnect the socket
     override fun onDestroy() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(userDataChangeReceiver)
         socket.disconnect()
         super.onDestroy()
     }
 
+    // The Broadcast receiver, receives info
+    // verifies if the user is logged in so it can update the user information in the navigation drawer,
+    // and also the channels and messages
     private val userDataChangeReceiver = object: BroadcastReceiver(){
         override fun onReceive(context: Context, intent: Intent?) {
-            //When Broadcast is send out
+            // When Broadcast is send out
             if( App.prefs.isLoggedIn){
-                //The user is logged in
+                // The user is logged in
                 userNameNavHeader.text = UserDataService.name
                 userEmailNavHeader.text = UserDataService.email
                 val resourceId = resources.getIdentifier(UserDataService.avatarName, "drawable", packageName)
@@ -100,7 +113,7 @@ class MainActivity : AppCompatActivity() {
 
                 MessageService.getChannels{complete ->
                     if(complete){
-                        //Verify if there are channels and present the first one
+                        // Verify if there are channels and present the first one
                         if(MessageService.channels.count()>0){
                             selectedChannel = MessageService.channels[0]
                             channelAdapter.notifyDataSetChanged()
@@ -112,13 +125,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Function to update the messageAdapter with the messages of the selected channel
     fun updateWithChannel(){
         mainChannelName.text = "#${selectedChannel?.name}"
         //download messages for channel
         if(selectedChannel != null){
             MessageService.getMessages(selectedChannel!!.id){ complete ->
                 if(complete){
-                    //Print out the messages
+                    // Print out the messages
                     messageAdapter.notifyDataSetChanged()
                     if(messageAdapter.itemCount > 0){
                         messageListView.smoothScrollToPosition(messageAdapter.itemCount-1)
@@ -137,6 +151,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Function to create an alertDialog in order to add a new channel in the application,
+    // and emiting it to the API in order to register the new channel
     fun addChannelClicked(view: View){
 
         if(App.prefs.isLoggedIn){
@@ -151,18 +167,18 @@ class MainActivity : AppCompatActivity() {
                         val channelName = nameTextField.text.toString()
                         val channelDesc = descTextField.text.toString()
 
-                        //Create channel with the channel name and description
+                        // Create channel with the channel name and description
                         socket.emit("newChannel", channelName, channelDesc)
                     }
                     .setNegativeButton("Cancel"){ _, _ ->
-                        //Cancel and close the dialog
+                        // Cancel and close the dialog
 
                     }
                     .show()
         }
     }
 
-    //Get the new channel created
+    // Get the new channel created from the API
     private val onNewChannel = Emitter.Listener { args ->
         if(App.prefs.isLoggedIn){
             runOnUiThread {
@@ -177,6 +193,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Get the new messages created
     private val onNewMessage = Emitter.Listener { args ->
         if(App.prefs.isLoggedIn){
             runOnUiThread{
@@ -198,10 +215,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // If the user is already logged in, it will perform a logout,
+    // in the other hand it will perform a login
     fun loginBtnNavClicked(view: View){
 
         if(App.prefs.isLoggedIn){
-            //logout
+
+            // logout
             UserDataService.logout()
             channelAdapter.notifyDataSetChanged()
             messageAdapter.notifyDataSetChanged()
@@ -217,6 +237,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Sending the written message to the API
     fun sendMessageBtnClicked(view: View){
         if(App.prefs.isLoggedIn && messageTextField.text.isNotEmpty() && selectedChannel != null){
             val userId = UserDataService.id

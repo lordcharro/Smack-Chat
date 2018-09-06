@@ -12,8 +12,13 @@ import com.charroapps.smackchat.Utilities.*
 import org.json.JSONException
 import org.json.JSONObject
 
+// Object(singleton) - same as in Java for the static classes
+// to deal all the calls to the API that correspond to the authentication, login and creation of an user
 object AuthService {
 
+    // Function to register the user in the database through the API
+    // using volley library for the call
+    // sending the email and password to the API
     fun registerUser(email: String, password: String, complete : (Boolean) -> Unit){
 
         val jsonBody = JSONObject()
@@ -38,6 +43,8 @@ object AuthService {
         App.prefs.requestQueue.add(registerRequest)
     }
 
+    // Make the login of the users already register in the database
+    // receiving the token for authorization
     fun loginUser(email: String, password: String, complete: (Boolean) -> Unit){
 
         val jsonBody = JSONObject()
@@ -76,6 +83,9 @@ object AuthService {
         App.prefs.requestQueue.add(loginRequest)
     }
 
+    // Creating the user with all fields filled
+    // The API needs to first register an user (fun registerUser)
+    // only then can create an user
     fun createUser(name : String, email: String, avatarName: String, avatarColor: String, complete: (Boolean) -> Unit){
 
         val jsonBody = JSONObject()
@@ -105,7 +115,7 @@ object AuthService {
             Log.d("ERROR", "Could not add user $error")
             complete(false)
         }){
-            //Set our HEAD and BODY for the call
+            // Set our HEAD and BODY for the call
             override fun getBodyContentType(): String {
                 return "application/json; charset=utf-8"
             }
@@ -124,6 +134,8 @@ object AuthService {
         App.prefs.requestQueue.add(createRequest)
     }
 
+    // Function to find the user, step after login, to get the rest of the user information
+    // after receiving the token from the login, we send the email and token
     fun findUserbyEmail(context: Context, complete: (Boolean) -> Unit){
 
         val findUserRequest = object : JsonObjectRequest(Method.GET, "$URL_GET_USER${App.prefs.userEmail}", null, Response.Listener { response ->

@@ -11,12 +11,18 @@ import com.charroapps.smackchat.Utilities.URL_GET_MESSAGES
 import org.json.JSONException
 
 
+// Object(singleton) - same as in Java for the static classes
+// to deal all the calls to the API that correspond to the channels and messages
 object MessageService {
 
     //channel array
     val channels = ArrayList<Channel>()
     val messages = ArrayList<Message>()
 
+    // Function to get the channels from the API connected to the database
+    // using volley library for the call
+    // getting the channel name, description and id
+    // and sending the header and body with authtoken
     fun getChannels(complete: (Boolean) -> Unit){
 
         val channelsRequest = object : JsonArrayRequest(Method.GET, URL_GET_CHANNELS, null, Response.Listener { response ->
@@ -29,10 +35,11 @@ object MessageService {
                     val channelDesc = channel.getString("description")
                     val channelId = channel.getString("_id")
 
-                    //Add the new channel to our channel array
+                    // Add the new channel to our channel array
                     val newChannel = Channel(channelName, channelDesc, channelId)
                     this.channels.add(newChannel)
                 }
+                complete(true)
 
             }catch (e: JSONException){
                 Log.d("JSON", "EXC: " + e.localizedMessage)
@@ -54,9 +61,12 @@ object MessageService {
                 return headers
             }
         }
+        // Make the call using volley library
         App.prefs.requestQueue.add(channelsRequest)
     }
 
+    // Function to get the messages like the function getChannels
+    // same behavior as getChannels
     fun getMessages (channelId: String, complete: (Boolean) -> Unit){
 
         val url = "$URL_GET_MESSAGES$channelId"
@@ -76,7 +86,7 @@ object MessageService {
                     val newMessage = Message(messageBody, userName,channelId, userAvatar, userAvatarColor, id, timeStamp)
                     this.messages.add(newMessage)
                 }
-
+                complete(true)
 
             }catch (e: JSONException){
                 Log.d("JSON", "EXC: " + e.localizedMessage)

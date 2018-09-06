@@ -4,6 +4,11 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.android.volley.toolbox.Volley
 
+// SharedPreferences to save the user email,
+// token and the flag is LoggedIn in order to keep
+// the login alive when the app is closed and reopened
+// get() to get the value and if it is empty, it will get the standard value
+// set(value) to save the value in the field
 class SharedPrefs(context: Context) {
 
     val PREFS_FILENAME = "prefs"

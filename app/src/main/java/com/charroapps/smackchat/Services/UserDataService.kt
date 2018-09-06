@@ -6,12 +6,14 @@ import java.util.*
 
 object UserDataService {
 
+    // Default values at the beginning
     var id = ""
     var avatarColor = ""
     var avatarName = ""
     var email = ""
     var name = ""
 
+    // Logout function to reset all the values
     fun logout(){
         id = ""
         avatarColor = ""
@@ -25,6 +27,10 @@ object UserDataService {
         MessageService.clearMessages()
     }
 
+    // The API returns the AvatarColor in a String
+    // example: [0.4554444444, 0.567777777, 0.7433333322, 1]
+    // replace the "[" "]" and "," for an empty
+    // and to get the RGB value, multiply the value for 255 and convert it to int
     fun returnAvatarColor(components: String): Int{
 
         val strippedColor = components
