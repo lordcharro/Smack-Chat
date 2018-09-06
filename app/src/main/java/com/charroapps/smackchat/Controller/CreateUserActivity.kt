@@ -13,6 +13,7 @@ import com.charroapps.smackchat.Utilities.BROADCAST_USER_DATA_CHANGE
 import kotlinx.android.synthetic.main.activity_create_user.*
 import java.util.*
 
+// Class that treats all the register procedure
 class CreateUserActivity : AppCompatActivity() {
 
     var userAvatar = "profileDefault"
@@ -24,7 +25,7 @@ class CreateUserActivity : AppCompatActivity() {
         createSpinner.visibility = View.INVISIBLE
     }
 
-
+    // Using the Random to random pick an image and color(dark and light)
     fun generateUserAvatarClicked(view: View){
         val random = Random()
         val color = random.nextInt(2)
@@ -40,6 +41,7 @@ class CreateUserActivity : AppCompatActivity() {
 
     }
 
+    // Generate a RGB color using the Random
     fun generateColorClicked(view: View){
 
         val random = Random()
@@ -57,6 +59,10 @@ class CreateUserActivity : AppCompatActivity() {
 
     }
 
+    // Verifies is all fields are filled,
+    // then calls registerUser, loginUser and createUser
+    // After that it start to broadcast the modifications
+    // for the other activities in order to be able to change the info
     fun createUserClicked (view: View){
 
         enableSpinner(true)

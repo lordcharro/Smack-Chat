@@ -11,6 +11,7 @@ import com.charroapps.smackchat.R
 import com.charroapps.smackchat.Services.AuthService
 import kotlinx.android.synthetic.main.activity_login.*
 
+// Class that treats all the login procedure
 class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,6 +34,8 @@ class LoginActivity : AppCompatActivity() {
         val password = loginPassTxt.text.toString()
         hideKeyboard()
 
+        // Verifies if the fields aren't empty, calls the loginUser function,
+        // then findUserbyEmail to make the login
         if(email.isNotEmpty() && password.isNotEmpty()){
             AuthService.loginUser(email, password){ loginSuccess ->
                 if(loginSuccess){
@@ -60,6 +63,7 @@ class LoginActivity : AppCompatActivity() {
         enableSpinner(false)
     }
 
+    // Enabling spinner and disable dependingon the responses
     fun enableSpinner(enable: Boolean){
         if(enable){
             loginSpinner.visibility = View.VISIBLE
